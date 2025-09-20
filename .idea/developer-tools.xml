@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DeveloperToolsToolWindowSettingsV1" lastSelectedContentNodeId="nano-id-generator" pluginVersion="7.1.0">
+    <developerToolsConfigurations>
+      <developerToolConfiguration developerToolId="jwt-encoder-decoder" id="e4bdf5aa-4b31-4ead-86c4-e65b848ab5a3" name="Workbench">
+        <properties>
+          <property key="headerText" type="INPUT" value="kotlin.String|{&#10;  &quot;typ&quot;: &quot;JWT&quot;,&#10;  &quot;alg&quot;: &quot;HS256&quot;&#10;}" />
+          <property key="payloadText" type="INPUT" value="kotlin.String|{&#10;  &quot;jti&quot;: &quot;96492d59-0ad5-4c00-892d-590ad5ac00f3&quot;,&#10;  &quot;sub&quot;: &quot;0123456789&quot;,&#10;  &quot;name&quot;: &quot;John Doe&quot;,&#10;  &quot;iat&quot;: 1681040515&#10;}" />
+          <property key="encodedText" type="INPUT" value="kotlin.String|eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI5NjQ5MmQ1OS0wYWQ1LTRjMDAtODkyZC01OTBhZDVhYzAwZjMiLCJzdWIiOiIwMTIzNDU2Nzg5IiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNjgxMDQwNTE1fQ.p8DXyu99_K1XjwQZHiD4Y7EvrZOp12zsZdPdv5tAo8I" />
+        </properties>
+      </developerToolConfiguration>
+    </developerToolsConfigurations>
+  </component>
+</project>
