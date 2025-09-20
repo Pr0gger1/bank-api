@@ -1,0 +1,92 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2
+      author: your_liquibase_username
+      comment: "Insert initial users"
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  valueComputed: "gen_random_uuid()"
+              - column:
+                  name: username
+                  value: "admin"
+              - column:
+                  name: password
+                  value: "admin"
+              - column:
+                  name: email
+                  value: "admin@example.com"
+              - column:
+                  name: role
+                  value: "ADMIN"
+
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  valueComputed: "gen_random_uuid()"
+              - column:
+                  name: username
+                  value: "user"
+              - column:
+                  name: password
+                  value: "user"
+              - column:
+                  name: email
+                  value: "guest@server.com"
+              - column:
+                  name: role
+                  value: "USER"
+
+        - insert:
+            tableName: cards
+            columns:
+              - column:
+                  name: id
+                  valueComputed: "gen_random_uuid()"
+              - column:
+                  name: number
+                  value: "4444555566667777"
+              - column:
+                  name: expiry_date
+                  value: "2025-12-31"
+              - column:
+                  name: balance
+                  value: "1000.00"
+              - column:
+                  name: status
+                  value: ACTIVE
+              - column:
+                  name: user_id
+                  valueComputed: "(select id from users where username = 'admin')"
+
+        - insert:
+            tableName: cards
+            columns:
+              - column:
+                  name: id
+                  valueComputed: "gen_random_uuid()"
+              - column:
+                  name: number
+                  value: "5555666677778888"
+              - column:
+                  name: balance
+                  value: "0.00"
+              - column:
+                  name: status
+                  value: EXPIRED
+              - column:
+                  name: expiry_date
+                  value: "2024-11-30"
+              - column:
+                  name: user_id
+                  valueComputed: "(select id from users where username = 'user')"
+
+      rollback:
+        - delete:
+            tableName: users
+            where: username in ('admin', 'user')

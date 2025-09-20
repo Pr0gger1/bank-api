@@ -84,6 +84,14 @@ down:  ## Stop and remove services
 	@echo "  - Networks removed"
 	@echo "  - Volumes preserved"
 
+down-v:
+	@echo "Removing services with volumes"
+	@docker-compose -f $(COMPOSE_FILE) down --remove-orphans --volumes
+	@echo "Services removed:"
+	@echo "  - Containers stopped"
+	@echo "  - Networks removed"
+	@echo "  - Volumes removed"
+
 logs:  ## View service logs
 	@echo "Tailing logs (Ctrl+C to exit)..."
 	@docker-compose -f $(COMPOSE_FILE) logs --tail=100 -f

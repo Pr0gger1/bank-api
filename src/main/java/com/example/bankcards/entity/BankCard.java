@@ -1,19 +1,18 @@
 package com.example.bankcards.entity;
 
 import com.example.bankcards.enums.BankCardStatus;
-import com.example.bankcards.util.SixteenDigitId;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 
 @Data
@@ -24,20 +23,27 @@ import java.time.LocalDate;
 @Entity
 public class BankCard {
 	@Id
-	@SixteenDigitId
-	@Size(min = 16, max = 16, message = "Card number must be 16 digits")
-	@Pattern(regexp = "^\\d{16}$", message = "Card number must be 16 digits")
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private UUID id;
+	
+	@Column(nullable = false, unique = true)
 	private String number;
 	
 	@PositiveOrZero(message = "Balance must be positive or zero")
-	private float balance;
+	@Column(scale = 2, precision = 19)
+	private BigDecimal balance;
 	
-	private BankCardStatus status;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
+	private User owner;
+	
+	@Enumerated(EnumType.STRING)
+	private BankCardStatus status = BankCardStatus.ACTIVE;
 	
 	@JsonSerialize(using = JsonSerializer.class)
-	private LocalDate validityPeriod;
+	private LocalDate expiryDate;
 	
-	public String getNumber() {
+	public String getMaskedNumber() {
 		String lastNumbers = number.substring(number.length() - 4);
 		String group = "*".repeat(4);
 		
