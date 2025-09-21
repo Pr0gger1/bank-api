@@ -18,6 +18,14 @@ services:
     networks:
       - backend_network
 
+  redis:
+    image: redis:alpine
+    container_name: bank_redis
+    ports:
+      - "6380:6379"
+    networks:
+      - backend_network
+
   api:
     image: openjdk:17-jdk-slim
     container_name: bank_api
@@ -29,15 +37,21 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     ports:
       - "8080:8080"
+      - "5005:5005"
     networks:
       - backend_network
     volumes:
       - ./target:/app
       - ./src/main/resources:/app/src/main/resources
     command: ["java", "-jar", "/app/bank-api.jar"]
+    depends_on:
+      - redis
+      - db
 
 volumes:
   postgres_data:

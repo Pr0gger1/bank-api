@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DeveloperToolsToolWindowSettingsV1" lastSelectedContentNodeId="nano-id-generator" pluginVersion="7.1.0">
+  <component name="DeveloperToolsToolWindowSettingsV1" lastSelectedContentNodeId="jwt-encoder-decoder" pluginVersion="7.1.0">
     <developerToolsConfigurations>
       <developerToolConfiguration developerToolId="jwt-encoder-decoder" id="e4bdf5aa-4b31-4ead-86c4-e65b848ab5a3" name="Workbench">
         <properties>
@@ -10,5 +10,6 @@
         </properties>
       </developerToolConfiguration>
     </developerToolsConfigurations>
+    <expandedGroupNodeIds />
   </component>
 </project>

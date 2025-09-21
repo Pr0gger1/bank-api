@@ -13,16 +13,24 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: username
-                  type: varchar(50)
+                  name: first_name
+                  type: varchar(255)
                   constraints:
-                    unique: true
                     nullable: false
               - column:
-                  name: password
-                  type: varchar(512)
+                  name: last_name
+                  type: varchar(255)
                   constraints:
                     nullable: false
+              - column:
+                  name: patronymic
+                  type: varchar(255)
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    checkConstraint: char_length(password) >= 8
               - column:
                   name: role
                   type: varchar(255)
@@ -57,7 +65,7 @@ databaseChangeLog:
                   name: balance
                   type: numeric(19, 2)
                   constraints:
-                    check: balance >= 0.0
+                    checkConstraint: balance >= 0.0
                     nullable: false
               - column:
                   name: status
@@ -65,3 +73,38 @@ databaseChangeLog:
               - column:
                   name: expiry_date
                   type: date
+
+        - createTable:
+            tableName: tokens
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: token
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: token_type
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expiration_date
+                  type: timestamp
+              - column:
+                  name: revoked
+                  type: boolean
+              - column:
+                  name: expired
+                  type: boolean
