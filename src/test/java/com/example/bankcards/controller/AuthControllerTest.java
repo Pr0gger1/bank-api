@@ -1,9 +1,9 @@
 package com.example.bankcards.controller;
 
 
-import com.example.bankcards.dto.RefreshTokenRequest;
-import com.example.bankcards.dto.SignInRequest;
-import com.example.bankcards.dto.UserDto;
+import com.example.bankcards.dto.request.LoginRequest;
+import com.example.bankcards.dto.request.RefreshTokenRequest;
+import com.example.bankcards.dto.request.RegisterRequest;
 import com.example.bankcards.repository.UserRepository;
 import com.example.bankcards.security.AuthService;
 import com.example.bankcards.security.JwtResponse;
@@ -56,7 +56,7 @@ public class AuthControllerTest {
 	@Test
 	public void testRegister_positive() throws Exception {
 		String email = "email@example.com";
-		UserDto dto = UserDto.builder()
+		RegisterRequest dto = RegisterRequest.builder()
 				.email(email)
 				.firstName("firstName")
 				.lastName("lastName")
@@ -85,7 +85,7 @@ public class AuthControllerTest {
 	@Test
 	public void testRegister_negative_userAlreadyExists() throws Exception {
 		String email = "email@example.com";
-		UserDto dto = UserDto.builder()
+		RegisterRequest dto = RegisterRequest.builder()
 				.email(email)
 				.firstName("firstName")
 				.lastName("lastName")
@@ -105,7 +105,7 @@ public class AuthControllerTest {
 	
 	@Test
 	public void testRegister_negative_invalidDto() throws Exception {
-		UserDto dto = UserDto.builder()
+		RegisterRequest dto = RegisterRequest.builder()
 				.email("email")
 				.firstName("firstName")
 				.patronymic("patronymic")
@@ -124,7 +124,7 @@ public class AuthControllerTest {
 	public void testLogin_positive() throws Exception {
 		String email = "email@example.com";
 		String password = "password";
-		SignInRequest dto = SignInRequest.builder()
+		LoginRequest dto = LoginRequest.builder()
 				.email(email)
 				.password(password)
 				.build();
@@ -149,7 +149,7 @@ public class AuthControllerTest {
 	public void testLogin_negative_wrongCredentials() throws Exception {
 		String email = "email@example.com";
 		String password = "password";
-		SignInRequest dto = SignInRequest.builder()
+		LoginRequest dto = LoginRequest.builder()
 				.email(email)
 				.password(password)
 				.build();
@@ -165,7 +165,7 @@ public class AuthControllerTest {
 	
 	@Test
 	public void testLogin_negative_invalidDto() throws Exception {
-		SignInRequest dto = SignInRequest.builder()
+		LoginRequest dto = LoginRequest.builder()
 				.email("email")
 				.password("")
 				.build();

@@ -1,27 +1,31 @@
 package com.example.bankcards.dto;
 
-import com.example.bankcards.util.Constants;
+import com.example.bankcards.enums.Role;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.UUID;
 
 @Data
 @Builder
 public class UserDto {
-	@NotNull(message = "Email is required")
+	@NotNull
+	private UUID id;
+	
 	@Email
 	private String email;
 	
-	@NotNull(message = "Password is required")
-	@Size(min = 8, max = 255, message = Constants.PASSWORD_VALIDATION_MESSAGE)
-	private String password;
-	
-	@NotNull(message = "First name is required")
+	@NotNull
 	private String firstName;
 	
-	@NotNull(message = "Last name is required")
+	@NotNull
 	private String lastName;
+	
+	@Nullable
 	private String patronymic;
+	
+	private Role role;
 }

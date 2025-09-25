@@ -1,8 +1,8 @@
 package com.example.bankcards.controller;
 
-import com.example.bankcards.dto.RefreshTokenRequest;
-import com.example.bankcards.dto.SignInRequest;
-import com.example.bankcards.dto.UserDto;
+import com.example.bankcards.dto.request.LoginRequest;
+import com.example.bankcards.dto.request.RefreshTokenRequest;
+import com.example.bankcards.dto.request.RegisterRequest;
 import com.example.bankcards.security.AuthService;
 import com.example.bankcards.security.JwtResponse;
 import jakarta.validation.Valid;
@@ -23,17 +23,17 @@ public class AuthController {
 	public ResponseEntity<JwtResponse> register(
 		@RequestBody
 		@Valid
-		UserDto userDto
+		RegisterRequest request
 	) {
-		log.info("Registering user: {}", userDto);
-		return ResponseEntity.ok(authService.register(userDto));
+		log.info("Registering user: {}", request);
+		return ResponseEntity.ok(authService.register(request));
 	}
 	
 	@PostMapping("login")
-	public ResponseEntity<JwtResponse> login(@RequestBody @Valid SignInRequest signInRequest) {
-		log.info("Logging in user: {}", signInRequest);
+	public ResponseEntity<JwtResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
+		log.info("Logging in user: {}", loginRequest);
 		
-		return ResponseEntity.ok(authService.login(signInRequest));
+		return ResponseEntity.ok(authService.login(loginRequest));
 	}
 	
 	@PostMapping("logout")

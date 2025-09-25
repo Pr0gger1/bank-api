@@ -1,7 +1,7 @@
 package com.example.bankcards.security;
 
-import com.example.bankcards.dto.SignInRequest;
-import com.example.bankcards.dto.UserDto;
+import com.example.bankcards.dto.request.LoginRequest;
+import com.example.bankcards.dto.request.RegisterRequest;
 import com.example.bankcards.entity.AuthToken;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.enums.Role;
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -40,9 +41,9 @@ public class AuthService {
 	@Value("${jwt.expiration.refreshInMinutes}")
 	private int refreshExpirationInMinutes;
 	
-	public JwtResponse login(SignInRequest signInRequest) {
-		String email = signInRequest.getEmail();
-		String password = signInRequest.getPassword();
+	public JwtResponse login(LoginRequest loginRequest) {
+		String email = loginRequest.getEmail();
+		String password = loginRequest.getPassword();
 		
 		return authenticate(email, password);
 	}
@@ -51,8 +52,13 @@ public class AuthService {
 			String email,
 			String password
 	) {
-		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(email, password);
-		authenticationManager.authenticate(token);
+		try {
+			UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(email, password);
+			authenticationManager.authenticate(token);
+		}
+		catch (BadCredentialsException e) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+		}
 		
 		User user = userRepository.findByEmail(email)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
@@ -115,19 +121,19 @@ public class AuthService {
 		});
 	}
 	
-	public JwtResponse register(UserDto userDto) {
-		if (userService.checkUserExistence(userDto.getEmail())) {
+	public JwtResponse register(RegisterRequest request) {
+		if (userService.checkUserExistence(request.getEmail())) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already exists");
 		}
 		
 		try {
-			String encodedPassword = passwordEncoder.encode(userDto.getPassword());
+			String encodedPassword = passwordEncoder.encode(request.getPassword());
 			
 			User user = User.builder()
-					.email(userDto.getEmail())
-					.firstName(userDto.getFirstName())
-					.lastName(userDto.getLastName())
-					.patronymic(userDto.getPatronymic())
+					.email(request.getEmail())
+					.firstName(request.getFirstName())
+					.lastName(request.getLastName())
+					.patronymic(request.getPatronymic())
 					.password(encodedPassword)
 					.role(Role.USER)
 					.build();
@@ -136,7 +142,7 @@ public class AuthService {
 			
 			log.debug("AuthService[register][1]: user has been saved");
 			
-			return authenticate(userDto.getEmail(), userDto.getPassword());
+			return authenticate(request.getEmail(), request.getPassword());
 		}
 		catch (InvalidDataAccessApiUsageException e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Server Error");

@@ -1,4 +1,4 @@
-package com.example.bankcards.dto;
+package com.example.bankcards.dto.request;
 
 import com.example.bankcards.util.Constants;
 import jakarta.validation.constraints.Email;
@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class SignInRequest {
+public class LoginRequest {
 	@Email
 	@NotBlank
 	private String email;

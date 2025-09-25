@@ -8,7 +8,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,34 +16,40 @@ import java.util.UUID;
 
 
 @Data
-@NoArgsConstructor
+@RequiredArgsConstructor
 @AllArgsConstructor
 @Builder
 @Table(name = "cards")
 @Entity
-public class BankCard {
+public class Card {
+	@Column(nullable = false, unique = true)
+	private String number;
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID id;
 	
-	@Column(nullable = false, unique = true)
-	private String number;
-	
 	@PositiveOrZero(message = "Balance must be positive or zero")
 	@Column(scale = 2, precision = 19)
-	private BigDecimal balance;
+	@Builder.Default
+	private BigDecimal balance = new BigDecimal(0);
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User owner;
 	
 	@Enumerated(EnumType.STRING)
+	@Builder.Default
 	private BankCardStatus status = BankCardStatus.ACTIVE;
 	
 	@JsonSerialize(using = JsonSerializer.class)
 	private LocalDate expiryDate;
 	
 	public String getMaskedNumber() {
+		if (number == null) {
+			throw new IllegalArgumentException("Number cannot be null");
+		}
+		
 		String lastNumbers = number.substring(number.length() - 4);
 		String group = "*".repeat(4);
 		

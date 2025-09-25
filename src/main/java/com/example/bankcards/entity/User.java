@@ -2,6 +2,7 @@ package com.example.bankcards.entity;
 
 import com.example.bankcards.enums.Role;
 import com.example.bankcards.util.Constants;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
@@ -46,6 +47,7 @@ public class User implements UserDetails {
 	private Role role = Role.USER;
 	
 	@Column(nullable = false)
+	@JsonIgnore
 	@Size(min = 8, max = 255, message = Constants.PASSWORD_VALIDATION_MESSAGE)
 	private String password;
 	

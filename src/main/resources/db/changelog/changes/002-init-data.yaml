@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_admin_user
+      author: Artem Kraus
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  valueComputed: gen_random_uuid()
+              - column:
+                  name: email
+                  value: 'admin@example.com'
+              - column:
+                  name: first_name
+                  value: 'Admin'
+              - column:
+                  name: last_name
+                  value: 'Admin'
+              - column:
+                  name: password
+                  value: '$2a$10$G5JF4XkZecjopuxdfqrA2.n.1rZeptE62fYYKyTmEYXVi75u0DDhC'
+              - column:
+                  name: role
+                  value: 'ADMIN'
