@@ -8,12 +8,12 @@ import org.springframework.data.domain.Page;
 import java.util.UUID;
 
 public interface UserService {
-	User getUserById(UUID id);
+	UserDto getUserById(UUID id);
 	User getUserByEmail(String email);
-	User createUser(RegisterRequest request);
+	UserDto createUser(RegisterRequest request);
 	UserDto updateUser(UserDto userDto);
-	Page<User> getUsers(int page, int size);
-	User getCurrentUser();
+	Page<UserDto> getUsers(int page, int size, String search);
+	UserDto getCurrentUser();
 	void deleteUser(UUID id);
 	boolean checkUserExistence(String email);
 }

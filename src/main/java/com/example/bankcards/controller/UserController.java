@@ -1,8 +1,11 @@
 package com.example.bankcards.controller;
 
 import com.example.bankcards.dto.UserDto;
-import com.example.bankcards.entity.User;
+import com.example.bankcards.dto.request.RegisterRequest;
 import com.example.bankcards.service.UserService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -14,30 +17,49 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('ADMIN')")
 public class UserController {
 	private final UserService userService;
 	
 	@GetMapping
-	@PreAuthorize("hasAuthority('ADMIN')")
-	public ResponseEntity<Page<User>> getAllUsers() {
-		// todo: реализовать метод получения всех пользователей
-		return null;
+	public ResponseEntity<Page<UserDto>> getAllUsers(
+			@RequestParam(required = false, defaultValue = "1")
+			@Min(1)
+			int page,
+			@RequestParam(required = false, defaultValue = "10")
+			@Min(1) @Max(100)
+			int size,
+			@RequestParam(required = false)
+			String q
+	) {
+		return ResponseEntity.ok(userService.getUsers(page - 1, size, q));
 	}
 	
 	@GetMapping("/{id}")
 	public ResponseEntity<UserDto> getUserById(@PathVariable UUID id) {
-		// todo: реализовать метод получения пользователя по id
-		return null;
+		return ResponseEntity.ok(userService.getUserById(id));
 	}
 	
 	@PutMapping
-	public ResponseEntity<UserDto> updateUser(@RequestBody UserDto user) {
+	public ResponseEntity<UserDto> updateUser(@RequestBody @Valid UserDto user) {
 		return ResponseEntity.ok(userService.updateUser(user));
 	}
 	
+	@PostMapping
+	public ResponseEntity<UserDto> createUser(@RequestBody RegisterRequest request) {
+		return ResponseEntity.ok(userService.createUser(request));
+	}
+	
+	@GetMapping("/current")
+	@PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+	public ResponseEntity<UserDto> getCurrentUser() {
+		return ResponseEntity.ok(userService.getCurrentUser());
+	}
+	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteUser(@PathVariable UUID id) {
+	public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
 		userService.deleteUser(id);
-		return ResponseEntity.ok("User was deleted successfully");
+		
+		return ResponseEntity.noContent().build();
 	}
 }

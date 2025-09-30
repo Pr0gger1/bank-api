@@ -2,6 +2,8 @@ package com.example.bankcards.controller;
 
 import com.example.bankcards.dto.CardDto;
 import com.example.bankcards.dto.request.CreateCardRequest;
+import com.example.bankcards.dto.response.CardBalanceResponse;
+import com.example.bankcards.entity.User;
 import com.example.bankcards.service.CardService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -10,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -20,7 +23,7 @@ import java.util.UUID;
 public class CardController {
 	private final CardService cardService;
 	
-	@DeleteMapping("/delete/{id}")
+	@DeleteMapping("/{id}")
 	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<String> deleteCard(@PathVariable UUID id) {
 		cardService.deleteCard(id);
@@ -28,12 +31,27 @@ public class CardController {
 		return ResponseEntity.ok("Bank card deleted successfully");
 	}
 	
+	@GetMapping("/{id}")
+	public ResponseEntity<CardDto> getCardById(
+			@AuthenticationPrincipal User user,
+			@PathVariable UUID id
+	) {
+		return ResponseEntity.ok(cardService.getCardById(user, id));
+	}
+	
 	@PatchMapping("/block/{id}")
-	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<String> blockCard(@PathVariable UUID id) {
 		cardService.blockCard(id);
 		
 		return ResponseEntity.ok("Bank card blocked successfully");
+	}
+	
+	@GetMapping("/balance/{id}")
+	public ResponseEntity<CardBalanceResponse> getCardBalance(
+			@AuthenticationPrincipal User user,
+			@PathVariable UUID id
+	) {
+		return ResponseEntity.ok(cardService.getCardBalance(user, id));
 	}
 	
 	@PatchMapping("/activate/{id}")
@@ -44,7 +62,7 @@ public class CardController {
 		return ResponseEntity.ok("Bank card activated successfully");
 	}
 	
-	@PostMapping("/create")
+	@PostMapping
 	@PreAuthorize("hasAuthority('ADMIN')")
 	public ResponseEntity<CardDto> createCard(@RequestBody @Valid CreateCardRequest createCardRequest) {
 		return ResponseEntity.ok(cardService.createCard(createCardRequest));
@@ -58,8 +76,11 @@ public class CardController {
 			
 			@RequestParam(required = false, defaultValue = "10")
 			@Min(1) @Max(100)
-			int size
+			int size,
+			@RequestParam(required = false)
+			String q,
+			@AuthenticationPrincipal User user
 	) {
-		return ResponseEntity.ok(cardService.getCards(page, size - 1));
+		return ResponseEntity.ok(cardService.getCards(page - 1, size, q, user));
 	}
 }

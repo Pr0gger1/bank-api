@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -39,7 +40,9 @@ public class GlobalExceptionHandler {
 		
 		ex.getBindingResult().getAllErrors().forEach(error -> {
 			String errorMessage = error.getDefaultMessage();
-			errors.add(errorMessage);
+			String field = ((FieldError) error).getField();
+
+			errors.add(String.format("%s: %s", field, errorMessage));
 		});
 		
 		response.put("errors", errors);
