@@ -105,7 +105,7 @@ class UserServiceImplTest {
 		
 		assertThatThrownBy(() -> userService.getUserByEmail("missing@example.com"))
 				.isInstanceOf(ResponseStatusException.class)
-				.hasMessageContaining("User not found");
+				.hasMessageContaining("User with email missing@example.com not found");
 	}
 	
 	@Test

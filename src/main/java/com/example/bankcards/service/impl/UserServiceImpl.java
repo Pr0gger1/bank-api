@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
 				.orElseThrow(
 						() -> new ResponseStatusException(
 								HttpStatus.NOT_FOUND,
-								Constants.USER_NOT_FOUND_ERROR_MESSAGE
+								String.format(Constants.USER_WITH_EMAIL_NOT_FOUND_ERROR_MESSAGE, email)
 						)
 				);
 	}

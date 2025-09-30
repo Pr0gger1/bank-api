@@ -10,6 +10,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,6 +42,11 @@ public class RequestFilter extends OncePerRequestFilter {
 	private final TokenBlacklistService blacklistingService;
 	private final UserDetailsService userDetailsService;
 	
+	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) {
+		return PUBLIC_ENDPOINTS.stream().anyMatch(request.getRequestURI()::startsWith);
+	}
+	
 	/**
 	 * Main filter method to process incoming requests and handle JWT authentication.
 	 */
@@ -50,12 +56,7 @@ public class RequestFilter extends OncePerRequestFilter {
 			@NonNull HttpServletResponse response,
 			@NonNull FilterChain filterChain
 	) throws ServletException, IOException {
-		if (isPermittedEndpoint(request)) {
-			filterChain.doFilter(request, response);
-			return;
-		}
-		
-		String jwt = extractTokenFromHeader(request.getHeader(Constants.AUTHORIZATION_HEADER_NAME));
+		String jwt = extractTokenFromHeader(request.getHeader(HttpHeaders.AUTHORIZATION));
 		
 		if (isTokenInvalid(jwt)) {
 			sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
@@ -70,14 +71,6 @@ public class RequestFilter extends OncePerRequestFilter {
 		}
 		
 		filterChain.doFilter(request, response);
-	}
-	
-	/**
-	 * Checks if the endpoint does not require authentication.
-	 */
-	private boolean isPermittedEndpoint(HttpServletRequest request) {
-		String uri = request.getRequestURI();
-		return PUBLIC_ENDPOINTS.stream().anyMatch(uri::startsWith);
 	}
 	
 	/**
@@ -100,8 +93,7 @@ public class RequestFilter extends OncePerRequestFilter {
 			return true;
 		}
 	}
-//
-
+	
 	/**
 	 * Sends an error response in JSON format.
 	 */
