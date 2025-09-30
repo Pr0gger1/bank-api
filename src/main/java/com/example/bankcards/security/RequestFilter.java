@@ -32,12 +32,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class RequestFilter extends OncePerRequestFilter {
-	private static final ObjectMapper MAPPER = new ObjectMapper();
 	private static final List<String> PUBLIC_ENDPOINTS = Constants.ENDPOINT_WHITELIST
 			.stream()
 			.map(endpoint -> endpoint.replace("/**", ""))
 			.toList();
 	
+	private final ObjectMapper objectMapper;
 	private final JwtService jwtService;
 	private final TokenBlacklistService blacklistingService;
 	private final UserDetailsService userDetailsService;
@@ -101,7 +101,7 @@ public class RequestFilter extends OncePerRequestFilter {
 		ProblemDetail errorResponse = ProblemDetail.forStatusAndDetail(HttpStatus.valueOf(status), message);
 		PrintWriter writer = response.getWriter();
 		response.setStatus(status);
-		writer.write(MAPPER.writeValueAsString(errorResponse));
+		writer.write(objectMapper.writeValueAsString(errorResponse));
 		writer.flush();
 	}
 	
