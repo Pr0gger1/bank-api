@@ -13,7 +13,6 @@ import com.example.bankcards.repository.UserRepository;
 import com.example.bankcards.service.CardService;
 import com.example.bankcards.util.CardUtils;
 import com.example.bankcards.util.Constants;
-import com.example.bankcards.util.UserUtils;
 import com.example.bankcards.util.mappers.CardMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -66,7 +65,7 @@ public class CardServiceImpl implements CardService {
 		
 		log.info("getCardById[1]: user authorities are {}", user.getAuthorities());
 		
-		boolean isAdmin = UserUtils.hasRole(user, Role.ADMIN);
+		boolean isAdmin = user.hasRole(Role.ADMIN);
 		Card card = cardResponse.get();
 		
 		if (!(isAdmin || card.getOwner().equals(user))) {
@@ -107,7 +106,7 @@ public class CardServiceImpl implements CardService {
 		Pageable pageable = PageRequest.of(page, size);
 		
 		if (search == null || search.isEmpty()) {
-			if (UserUtils.hasRole(user, Role.USER)) {
+			if (user.hasRole(Role.USER)) {
 				return getOwnerCards(user, page, size);
 			}
 			

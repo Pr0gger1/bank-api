@@ -1,20 +1,24 @@
-package com.example.bankcards.security;
+package com.example.bankcards.service.impl;
 
 import com.example.bankcards.dto.request.LoginRequest;
 import com.example.bankcards.dto.request.RegisterRequest;
-import com.example.bankcards.entity.AuthToken;
+import com.example.bankcards.dto.response.JwtResponse;
+import com.example.bankcards.dto.response.LogoutResponse;
+import com.example.bankcards.entity.RefreshToken;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.enums.Role;
-import com.example.bankcards.enums.TokenType;
-import com.example.bankcards.repository.AuthTokenRepository;
+import com.example.bankcards.repository.RefreshTokenRepository;
 import com.example.bankcards.repository.UserRepository;
+import com.example.bankcards.security.TokenBlacklistService;
+import com.example.bankcards.service.RefreshTokenService;
 import com.example.bankcards.service.UserService;
 import com.example.bankcards.util.Constants;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,8 +26,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @Slf4j
@@ -32,14 +34,15 @@ import java.util.Optional;
 public class AuthService {
 	private final JwtService jwtService;
 	private final UserService userService;
-	private final AuthenticationManager authenticationManager;
-	private final UserRepository userRepository;
-	private final AuthTokenRepository authTokenRepository;
-	private final PasswordEncoder passwordEncoder;
 	private final TokenBlacklistService tokenBlacklistService;
+	private final RefreshTokenService refreshTokenService;
+	private final JwtCookieService jwtCookieService;
 	
-	@Value("${jwt.expiration.refreshInMinutes}")
-	private int refreshExpirationInMinutes;
+	private final UserRepository userRepository;
+	private final RefreshTokenRepository refreshTokenRepository;
+	
+	private final AuthenticationManager authenticationManager;
+	private final PasswordEncoder passwordEncoder;
 	
 	public JwtResponse login(LoginRequest loginRequest) {
 		String email = loginRequest.getEmail();
@@ -64,61 +67,64 @@ public class AuthService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
 		
 		String accessToken = jwtService.generateAccessToken(user);
-		String refreshToken = jwtService.generateRefreshToken(user);
-		
-		AuthToken authToken = AuthToken.builder()
-				.user(user)
-				.token(refreshToken)
-				.expirationDate(Instant.now().plus(refreshExpirationInMinutes, ChronoUnit.MINUTES))
-				.tokenType(TokenType.REFRESH)
-				.build();
-		
-		authTokenRepository.save(authToken);
-		log.debug("AuthService[buildToken][1]: token has been saved");
+		RefreshToken refreshToken = refreshTokenService.generateRefreshToken(user);
+		ResponseCookie refreshTokenCookie = jwtService.generateRefreshJwtCookie(refreshToken.getToken());
 		
 		return JwtResponse.builder()
 				.accessToken(accessToken)
-				.refreshToken(refreshToken)
+				.refreshCookie(refreshTokenCookie)
+				.user(user)
 				.build();
 	}
 	
-	public JwtResponse refreshToken(String refreshToken) {
-		AuthToken authToken = jwtService.verifyRefreshToken(refreshToken);
+	public JwtResponse refreshToken(HttpServletRequest request) {
+		String refreshToken = jwtCookieService.getRefreshJwtFromCookies(request);
 		
-		if (authToken.isExpired() || authToken.isRevoked() || !jwtService.validateRefreshToken(refreshToken)) {
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+		if (refreshToken == null || refreshToken.isEmpty() || !jwtService.validateRefreshToken(refreshToken)) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token not found");
 		}
 		
-		authToken.setRevoked(true);
-		authToken.setExpired(true);
+		RefreshToken oldRefreshToken = refreshTokenService.verifyRefreshToken(refreshToken);
+		User user = oldRefreshToken.getUser();
 		
-		authTokenRepository.save(authToken);
+		refreshTokenRepository.delete(oldRefreshToken);
 		
-		User user = authToken.getUser();
+		String accessToken = jwtService.generateAccessToken(user);
+		RefreshToken newRefreshToken = refreshTokenService.generateRefreshToken(user);
+		ResponseCookie refreshTokenCookie = jwtService.generateRefreshJwtCookie(newRefreshToken.getToken());
 		
-		return authenticate(user.getEmail(), user.getPassword());
+		return JwtResponse.builder()
+				.accessToken(accessToken)
+				.refreshCookie(refreshTokenCookie)
+				.user(user)
+				.build();
 	}
 	
-	public void logout(String authHeader) {
+	public LogoutResponse logout(HttpServletRequest request, String authHeader) {
 		String accessToken = authHeader.substring(Constants.BEARER_PREFIX.length()).trim();
+		String refreshToken = jwtCookieService.getRefreshJwtFromCookies(request);
 
 		if (!jwtService.validateAccessToken(accessToken)) {
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Access token is invalid");
 		}
 		
-		String email = jwtService.extractUsername(accessToken);
-		User user = userRepository.findByEmail(email)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+		if (refreshToken == null || !jwtService.validateRefreshToken(refreshToken)) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token is invalid");
+		}
 		
-		Optional<AuthToken> optionalRefreshToken = authTokenRepository.findByUser(user);
+		Optional<RefreshToken> optionalRefreshToken = refreshTokenRepository.findByToken(refreshToken);
 		
 		optionalRefreshToken.ifPresent(token -> {
-			token.setRevoked(true);
-			token.setExpired(true);
-			
-			tokenBlacklistService.blackListJwt(accessToken);
-			authTokenRepository.save(token);
+			if (!accessToken.isEmpty()) {
+				tokenBlacklistService.blackListJwt(accessToken);
+			}
+
+			refreshTokenRepository.deleteById(token.getId());
 		});
+		
+		return LogoutResponse.builder()
+				.refreshToken(jwtCookieService.getCleanJwtRefreshCookie())
+				.build();
 	}
 	
 	public JwtResponse register(RegisterRequest request) {

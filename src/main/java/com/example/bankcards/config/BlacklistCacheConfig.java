@@ -18,7 +18,7 @@ import java.util.Map;
 @Configuration
 @AutoConfigureAfter(RedisAutoConfiguration.class)
 public class BlacklistCacheConfig {
-	@Value("${jwt.expiration.accessInMinutes}")
+	@Value("${jwt.expiration.accessInMs}")
 	private int jwtDuration;
 	
 	@Value("${spring.data.redis.host}")
@@ -36,7 +36,7 @@ public class BlacklistCacheConfig {
 		return (builder) -> {
 			RedisCacheConfiguration config = RedisCacheConfiguration
 					.defaultCacheConfig()
-					.entryTtl(Duration.ofMinutes(jwtDuration));
+					.entryTtl(Duration.ofMillis(jwtDuration));
 			
 			Map<String, RedisCacheConfiguration> configurationMap = new HashMap<>() {{
 				put(Constants.BLACKLIST_CACHE_NAME, config);

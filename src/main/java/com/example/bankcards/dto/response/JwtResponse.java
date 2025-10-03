@@ -1,9 +1,11 @@
-package com.example.bankcards.security;
+package com.example.bankcards.dto.response;
 
+import com.example.bankcards.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.ResponseCookie;
 
 @Getter
 @Builder
@@ -11,5 +13,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class JwtResponse {
 	private String accessToken;
-	private String refreshToken;
+	private ResponseCookie refreshCookie;
+	private User user;
 }

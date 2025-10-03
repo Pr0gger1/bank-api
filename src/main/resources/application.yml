@@ -1,4 +1,9 @@
 spring:
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      adjust-dates-to-context-time-zone: false
   jpa:
     hibernate:
       ddl-auto: none
@@ -38,9 +43,12 @@ logging:
         transaction: DEBUG
 
 jwt:
+  cookie:
+    refresh:
+      name: jwt-refresh-cookie
   expiration:
-    accessInMinutes: 60
-    refreshInMinutes: 10080
+    accessInMs: 3600000
+    refreshInMs: 604800000
   secret:
     access: ${JWT_ACCESS_SECRET}
     refresh: ${JWT_REFRESH_SECRET}

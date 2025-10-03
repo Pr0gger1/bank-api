@@ -51,6 +51,14 @@ public class User implements UserDetails {
 	@Size(min = 8, max = 255, message = Constants.PASSWORD_VALIDATION_MESSAGE)
 	private String password;
 	
+	public boolean hasRole(Role role) {
+		Collection<? extends GrantedAuthority> authorities = getAuthorities();
+		
+		return authorities.stream()
+				.map(GrantedAuthority::getAuthority)
+				.anyMatch(a -> a.equals(role.getAuthority()));
+	}
+	
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return List.of(new SimpleGrantedAuthority(role.getAuthority()));

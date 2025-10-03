@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tokens")
-public class AuthToken {
+public class RefreshToken {
 	@Id
 	@GeneratedValue
 	@UuidGenerator(style = UuidGenerator.Style.TIME)
@@ -37,7 +37,7 @@ public class AuthToken {
 	@Builder.Default
 	private boolean expired = false;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "user_id")
 	private User user;
 }
