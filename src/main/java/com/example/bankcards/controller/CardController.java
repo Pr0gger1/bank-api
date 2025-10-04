@@ -40,6 +40,7 @@ public class CardController {
 	}
 	
 	@PatchMapping("/block/{id}")
+	@PreAuthorize("hasAnyAuthority('ADMIN')")
 	public ResponseEntity<String> blockCard(@PathVariable UUID id) {
 		cardService.blockCard(id);
 		
@@ -47,6 +48,7 @@ public class CardController {
 	}
 	
 	@GetMapping("/balance/{id}")
+	@PreAuthorize("hasAnyAuthority('USER')")
 	public ResponseEntity<CardBalanceResponse> getCardBalance(
 			@AuthenticationPrincipal User user,
 			@PathVariable UUID id
