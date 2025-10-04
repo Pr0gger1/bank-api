@@ -1,10 +1,7 @@
 openapi: 3.1.0
 info:
-  title: Bank Cards API
-  description: API for bank cards management
-  contact:
-    name: Support
-    email: support@bank.com
+  title: Bank API
+  description: REST API для управления банковскими картами
   version: "1.0"
 servers:
   - url: http://localhost:8080
@@ -42,7 +39,7 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 $ref: "#/components/schemas/PageUserDto"
     put:
@@ -59,7 +56,7 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 $ref: "#/components/schemas/UserDto"
     post:
@@ -76,7 +73,7 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 $ref: "#/components/schemas/UserDto"
   /api/transactions:
@@ -94,7 +91,7 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
   /api/cards:
@@ -129,7 +126,7 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 $ref: "#/components/schemas/PageCardDto"
     post:
@@ -146,7 +143,7 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 $ref: "#/components/schemas/CardDto"
   /api/auth/register:
@@ -164,27 +161,21 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
-                $ref: "#/components/schemas/JwtResponse"
+                $ref: "#/components/schemas/AuthorizationResponse"
   /api/auth/refresh:
     post:
       tags:
         - auth-controller
       operationId: refreshToken
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RefreshTokenRequest"
-        required: true
       responses:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
-                $ref: "#/components/schemas/JwtResponse"
+                $ref: "#/components/schemas/AuthorizationResponse"
   /api/auth/logout:
     post:
       tags:
@@ -214,9 +205,9 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
-                $ref: "#/components/schemas/JwtResponse"
+                $ref: "#/components/schemas/AuthorizationResponse"
   /api/cards/block/{id}:
     patch:
       tags:
@@ -233,7 +224,7 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
   /api/cards/activate/{id}:
@@ -252,7 +243,7 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
   /api/users/{id}:
@@ -271,7 +262,7 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 $ref: "#/components/schemas/UserDto"
     delete:
@@ -297,7 +288,7 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 $ref: "#/components/schemas/UserDto"
   /api/cards/{id}:
@@ -316,7 +307,7 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 $ref: "#/components/schemas/CardDto"
     delete:
@@ -334,7 +325,7 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 type: string
   /api/cards/balance/{id}:
@@ -353,7 +344,7 @@ paths:
         "200":
           description: OK
           content:
-            "*/*":
+            '*/*':
               schema:
                 $ref: "#/components/schemas/CardBalanceResponse"
 components:
@@ -475,12 +466,12 @@ components:
           enum:
             - USER
             - ADMIN
-        username:
-          type: string
         authorities:
           type: array
           items:
             $ref: "#/components/schemas/GrantedAuthority"
+        username:
+          type: string
         enabled:
           type: boolean
         accountNonLocked:
@@ -489,21 +480,11 @@ components:
           type: boolean
         credentialsNonExpired:
           type: boolean
-    JwtResponse:
+    AuthorizationResponse:
       type: object
       properties:
-        accessToken:
+        token:
           type: string
-        refreshToken:
-          type: string
-    RefreshTokenRequest:
-      type: object
-      properties:
-        refreshToken:
-          type: string
-          minLength: 1
-      required:
-        - refreshToken
     LoginRequest:
       type: object
       properties:
